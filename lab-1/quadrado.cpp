@@ -7,7 +7,10 @@
 float gX = 0, gY = 0;
 bool keyStatus[256] = {false};
 
-float initial values[2][4] = {{0.25, 0.75, 0.75, 0.25}, {0.25, 0.25, 0.75, 0.75}};
+bool clickOnSquare = false;
+
+float lastMouseX = 0, lastMouseY = 0;
+float initial_values[2][4] = {{0.25, 0.75, 0.75, 0.25}, {0.25, 0.25, 0.75, 0.75}};
 
 void display(void)
 {
@@ -48,36 +51,69 @@ void idle(void){
 void mouse(int button, int state, int x, int y){
    y = TAMANHO_JANELA - y;
 
-   printf("x %f - y %f\n", gX, gY);
+   printf("button %d - state %d - x %f - y %f\n", button, state, gX, gY);
+   lastMouseX = (float)x/(float)TAMANHO_JANELA;
+   lastMouseY = (float)y/(float)TAMANHO_JANELA;
+
+   if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+      if(x > (initial_values[0][0] + gX)*TAMANHO_JANELA && x < (initial_values[0][2] + gX)*TAMANHO_JANELA && y > (initial_values[1][0] + gY)*TAMANHO_JANELA && y < (initial_values[1][2] + gY)*TAMANHO_JANELA){
+         clickOnSquare = true;
+      }
+   }else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP){
+      clickOnSquare = false;
+   }
+}
+
+void mouseMotion(int x, int y){
+   y = TAMANHO_JANELA - y;
+
+   printf("gx %f - gy %f\n", gX, gY);
+   printf("diffX %f - diffY %f\n", (float)(lastMouseX-x)/(float)TAMANHO_JANELA, (float)(lastMouseY-y)/(float)TAMANHO_JANELA);
+
+   if(clickOnSquare){
+      gX += (float)x/(float)TAMANHO_JANELA - lastMouseX;
+      gY += (float)y/(float)TAMANHO_JANELA - lastMouseY;
+
+      lastMouseX = (float)x/(float)TAMANHO_JANELA;
+      lastMouseY = (float)y/(float)TAMANHO_JANELA;
+
+      glutPostRedisplay();
+   }
+}
+
+void mousePassiveMotion(int x, int y){
+   printf("Mouse passive motion func\n");
 }
 
 void init (void) 
 {
-  /* selecionar cor de fundo (preto) */
-  glClearColor (0.0, 0.0, 0.0, 0.0);
+   /* selecionar cor de fundo (preto) */
+   glClearColor (0.0, 0.0, 0.0, 0.0);
 
-  /* inicializar sistema de visualizacao */
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+   /* inicializar sistema de visualizacao */
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
 }
 
 int main(int argc, char** argv)
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize (TAMANHO_JANELA, TAMANHO_JANELA); 
-    glutInitWindowPosition (100, 100);
-    glutCreateWindow ("hello world");
-    init ();
-    glutDisplayFunc(display);
+   glutInit(&argc, argv);
+   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
+   glutInitWindowSize (TAMANHO_JANELA, TAMANHO_JANELA); 
+   glutInitWindowPosition (100, 100);
+   glutCreateWindow ("hello world");
+   init ();
+   glutDisplayFunc(display);
 
-    glutKeyboardFunc(keyPress);
-    glutKeyboardUpFunc(keyUp);
-    glutIdleFunc(idle);
-    glutMouseFunc(mouse);
+   glutKeyboardFunc(keyPress);
+   glutKeyboardUpFunc(keyUp);
+   glutIdleFunc(idle);
+   glutMouseFunc(mouse);
+   glutMotionFunc(mouseMotion);
+   glutPassiveMotionFunc(mousePassiveMotion);
 
-    glutMainLoop();
+   glutMainLoop();
 
-    return 0;
+   return 0;
 }
