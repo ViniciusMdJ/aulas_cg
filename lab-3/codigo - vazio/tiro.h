@@ -2,6 +2,7 @@
 #define	TIRO_H
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <iostream>
 
 #define radiusTiro 5
 
@@ -22,12 +23,14 @@ public:
         gX = x; 
         gY = y; 
         gDirectionAng = directionAng; 
-        gVel = 0.1;
+        gVel = 0.3;
+        
+        printf("Tiro criado em (%f, %f) com angulo %f\n", gX, gY, gDirectionAng);
     };
     void Desenha(){ 
         DesenhaTiro(gX, gY);
     };
-    void Move();
+    void Move(GLdouble timeDiference);
     bool Valido();
     void GetPos(GLfloat &xOut, GLfloat &yOut){
         xOut = gX;

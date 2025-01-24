@@ -125,7 +125,16 @@ void init(void)
 
 void idle(void)
 {
-    double inc = INC_KEYIDLE*10;
+    static GLdouble previousTime = glutGet(GLUT_ELAPSED_TIME);
+    GLdouble currentTime, timeDiference;
+    //Pega o tempo que passou do inicio da aplicacao
+    currentTime = glutGet(GLUT_ELAPSED_TIME);
+    // Calcula o tempo decorrido desde de a ultima frame.
+    timeDiference = currentTime - previousTime;
+    //Atualiza o tempo do ultimo frame ocorrido
+    previousTime = currentTime;
+
+    double inc = INC_KEYIDLE*timeDiference*10;
     //Treat keyPress
     if(keyStatus[(int)('a')])
     {
@@ -139,14 +148,16 @@ void idle(void)
     //Trata o tiro (soh permite um tiro por vez)
     //Poderia usar uma lista para tratar varios tiros
     if(tiro){
-        tiro->Move();
-
-        //Trata colisao
-        if (alvo.Atingido(tiro)){
-            alvo.Recria(rand()%500 - 250, 200);
-        }
+        tiro->Move(timeDiference);
 
         if (!tiro->Valido()){ 
+            delete tiro;
+            tiro = NULL;
+        }
+
+        //Trata colisao
+        if (tiro && alvo.Atingido(tiro)){
+            alvo.Recria(rand()%500 - 250, 200);
             delete tiro;
             tiro = NULL;
         }

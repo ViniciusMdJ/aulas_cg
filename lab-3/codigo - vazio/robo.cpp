@@ -18,10 +18,10 @@ void Robo::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
 
+            glPointSize(30.0);
     glBegin(GL_POINTS);
         for (int i = 0; i < 12; i++)
         {
-            glPointSize(30.0);
             float theta = i * M_PI / 6;
             glVertex2f(radius * cos(theta), radius * sin(theta));
         }
@@ -85,12 +85,33 @@ void Robo::MoveEmX(GLfloat dx)
     gThetaWheel -= dx;
 }
 
+void TranslatePoint(GLfloat x, GLfloat y, GLfloat sumX, GLfloat sumY, GLfloat &xOut, GLfloat &yOut){
+    xOut = x + sumX;
+    yOut = y + sumY;
+}
+
 //Funcao auxiliar de rotacao
 void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yOut){
-
+    xOut = x * cos(angle * M_PI / 180) - y * sin(angle * M_PI / 180);
+    yOut = x * sin(angle * M_PI / 180) + y * cos(angle * M_PI / 180);
 }
 
 Tiro* Robo::Atira()
 {
-    return NULL;
+    GLfloat initX = 0;
+    GLfloat initY = 0;
+
+    TranslatePoint(initX, initY, 0, paddleHeight, initX, initY);
+    RotatePoint(initX, initY, gTheta3, initX, initY);
+    TranslatePoint(initX, initY, 0, paddleHeight, initX, initY);
+    RotatePoint(initX, initY, gTheta2, initX, initY);
+    TranslatePoint(initX, initY, 0, paddleHeight, initX, initY);
+    RotatePoint(initX, initY, gTheta1, initX, initY);
+
+    TranslatePoint(initX, initY, gX, gY + baseHeight, initX, initY);
+    
+    GLfloat angle = gTheta1 + gTheta2 + gTheta3 + 90;
+    printf("Angulo dos bracos: %f, %f, %f\n", gTheta1, gTheta2, gTheta3);
+    printf("Atirando: x=%f, y=%f\n", initX, initY);
+    return new Tiro(initX, initY, angle);
 }
